@@ -57,13 +57,16 @@ function love.load()
     gTextures = {
         ['background'] = love.graphics.newImage('graphics/background.png'),
         ['main'] = love.graphics.newImage('graphics/breakout.png'),
-        ['arrow'] = love.graphics.newImage('graphics/arrows.png'),
-        ['heart'] = love.graphics.newImage('graphics/hearts.png'),
+        ['arrows'] = love.graphics.newImage('graphics/arrows.png'),
+        ['hearts'] = love.graphics.newImage('graphics/hearts.png'),
         ['particle'] = love.graphics.newImage('graphics/particle.png')
     }
 
     gFrames = {
-        ['paddles'] = GenerateQuadsPaddles(gTextures['main'])
+        ['paddles'] = GenerateQuadsPaddles(gTextures['main']),
+        ['balls'] = GenerateQuadsBalls(gTextures['main']),
+        ['bricks'] = GenerateQuadsBricks(gTextures['main']),
+        ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9),
     }
 
     -- initialize our virtual resolution, which will be rendered within our
@@ -108,6 +111,8 @@ function love.load()
     gStateMachine = StateMachine {
         ['start'] = function () return StartState() end,
         ['play'] = function () return PlayState() end,
+        ['serve'] = function () return ServeState() end,
+        ['game-over'] = function () return GameOverState() end,
         
     }
     gStateMachine:change('start')
@@ -198,9 +203,29 @@ function love.draw()
     push:apply('end')
 end
 
+function renderHealth(health)
+    
+    local healthX = VIRTUAL_WIDTH - 100
+
+    for i = 1, health do
+        love.graphics.draw(gTextures['hearts'], gFrames['hearts'][1], healthX, 4)
+        healthX = healthX + 11
+    end
+
+    for i = 1, 3 - health do
+        love.graphics.draw(gTextures['hearts'], gFrames['hearts'][2], healthX, 4)
+        healthX = healthX + 11
+    end
+end
+
 function displayFPS()
     love.graphics.setFont(gFonts['small'])
     love.graphics.setColor(0, 1, 0, 1)
     love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 5, 5)
 end
 
+function renderScore(score)
+    love.graphics.setFont(gFonts['small'])
+    love.graphics.print('score ', VIRTUAL_WIDTH - 60, 5)
+    love.graphics.printf(tostring(score), VIRTUAL_WIDTH - 50, 5, 40, 'right')
+end
